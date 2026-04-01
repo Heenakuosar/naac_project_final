@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 import AuthService from "@/service/authService";
 import { useDispatch } from "react-redux";
 import { login } from "@/redux/slices/authSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -60,15 +60,16 @@ const Login = () => {
       };
       const response = await AuthService.Login(payload);
       if (response?.status === 200) {
+        const { user, token } = response.data.data || {};
         toast.success("Login successful!");
-        localStorage.setItem("access_token", response.data.data?.token);
-        localStorage.setItem("user", JSON.stringify(response.data.data?.user));
-        dispatch(login(response.data.data?.user));
+        dispatch(login({ user, token }));
         navigate("/dashboard");
       }
     } catch (error) {
       console.error("Login failed", error);
-      toast.error("Login failed. Please try again.");
+      const message =
+        error?.data?.message || error?.message || "Login failed. Please try again.";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -293,13 +294,13 @@ const Login = () => {
             {/* Sign Up Link */}
             <p className="text-center text-sm text-gray-600">
               Don't have an account?{" "}
-              <a
-                href="#"
+              <Link
+                to="/register"
                 className="font-semibold text-gray-900 hover:underline transition-colors"
                 tabIndex={isLoading ? -1 : 0}
               >
                 Sign up for free
-              </a>
+              </Link>
             </p>
           </CardFooter>
         </Card>

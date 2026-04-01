@@ -1,8 +1,8 @@
 import React, { useEffect } from "react"
-import { Button } from "./components/ui/button"
-import { Route, Routes, useNavigate } from "react-router-dom"
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import Home from "./views/home"
 import Login from "./views/login"
+import Register from "./views/register"
 import DashboardLayout from "./layout/dashboardLayout"
 //import SeedMoneyForm from './views/SeedMoneyForm'
 import { Toaster } from "react-hot-toast"
@@ -10,21 +10,25 @@ import { Toaster } from "react-hot-toast"
 
 function App() {
   const navigate = useNavigate();
-  useEffect(()=>{
-    if(localStorage.getItem("access_token")){
-      // navigate to dashboard
+  const location = useLocation();
+
+  useEffect(() => {
+    const hasToken = localStorage.getItem("access_token");
+    const isAuthPage = ["/login", "/register"].includes(location.pathname);
+
+    if (hasToken) {
       navigate("/dashboard");
-    }else{
-      // navigate to login
+    } else if (!isAuthPage) {
       navigate("/login");
     }
-  },[])
+  }, [location.pathname, navigate]);
 
   return (
     <>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/dashboard/*" element={<DashboardLayout />} />
       </Routes>
       <Toaster/>

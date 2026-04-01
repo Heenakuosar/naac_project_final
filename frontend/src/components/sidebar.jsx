@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "@/redux/slices/authSlice";
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,6 +23,7 @@ const cn = (...classes) => classes.filter(Boolean).join(" ");
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const [collapsed, setCollapsed] = useState(false);
   const [facultyOpen, setFacultyOpen] = useState(false);
@@ -47,6 +50,11 @@ const Sidebar = () => {
     "Dr. Khaleel Ahmad",
     "Dr. Fareeha Rasheed",
   ];
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
 
   return (
     <div
@@ -197,7 +205,7 @@ const Sidebar = () => {
 
         <button
           className="w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg"
-          onClick={() => navigate("/login")}
+          onClick={handleLogout}
         >
           <LogOut size={16} />
           {!collapsed && "Logout"}
