@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import axios from 'axios' // 1. Axios import karein
+import toast from 'react-hot-toast'
+import FacultyService from '@/service/facultyService'
 
 const SeedMoneyForm = () => {
   const [formData, setFormData] = useState({
@@ -26,25 +27,20 @@ const SeedMoneyForm = () => {
     // Kyunki aap file upload kar rahe hain, humein simple JSON ki jagah 
     // "FormData" object use karna padta hai
     const dataToSend = new FormData();
-    dataToSend.append('category', 'seed-money');
     dataToSend.append('teacherName', formData.teacherName);
-    dataToSend.append('amountProvided', formData.seedMoneyAmount);
-    dataToSend.append('year', formData.yearOfReceiving);
-    dataToSend.append('duration', formData.yearOfCompletion);
-    dataToSend.append('department', 'Information Technology');
+    dataToSend.append('seedMoneyAmount', formData.seedMoneyAmount);
+    dataToSend.append('yearOfReceiving', formData.yearOfReceiving);
+    dataToSend.append('yearOfCompletion', formData.yearOfCompletion);
     if(formData.document) {
         dataToSend.append('document', formData.document);
     }
 
     try {
-// Is line ko copy karke wahan paste kar dein
-      const res = await axios.post("http://127.0.0.1:8000/api/criteria3/add", dataToSend);      
-//const res = await axios.post('http://localhost:8000/api/criteria3/add', dataToSend);
-      alert('✅ Data Successfully saved to MANUU Server!');
+      await FacultyService.submitFacultyForm(FacultyService.FACULTY_FORM_TYPES.SEED_MONEY, dataToSend);
+      toast.success('Data successfully saved!');
       handleReset(); // Form reset kar dein
     } catch (err) {
-      console.error('Error:', err);
-      alert(`❌ Error: ${err.response?.data?.error || err.message}`);
+      toast.error(err?.data?.message || 'Failed to save data');
     }
   }
 
@@ -58,15 +54,36 @@ const SeedMoneyForm = () => {
     })
   }
 
-  const generateReport = () => {
-    const reportData = `Teacher Name: ${formData.teacherName}\nSeed Money Amount: ${formData.seedMoneyAmount}\nYear of Receiving: ${formData.yearOfReceiving}\nYear of Completion: ${formData.yearOfCompletion}`
-    const blob = new Blob([reportData], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'SeedMoneyReport.txt'
-    link.click()
-    URL.revokeObjectURL(url)
+  const generateReport = async () => {
+    try {
+      const blob = await FacultyService.downloadIndividualReport(
+        FacultyService.FACULTY_FORM_TYPES.SEED_MONEY
+      )
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'CR-Individual-seed-money.pdf'
+      link.click()
+      URL.revokeObjectURL(url)
+      toast.success('PDF report downloaded')
+    } catch {
+      toast.error('Failed to generate PDF report')
+    }
+  }
+
+  const generateCommonReport = async () => {
+    try {
+      const blob = await FacultyService.downloadConsolidatedReport()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'CR-Common-All-Forms.pdf'
+      link.click()
+      URL.revokeObjectURL(url)
+      toast.success('Common PDF report downloaded')
+    } catch {
+      toast.error('Failed to generate common PDF report')
+    }
   }
 
   return (
@@ -172,7 +189,14 @@ const SeedMoneyForm = () => {
               onClick={generateReport}
               className="px-6 py-2 bg-green-600 text-white rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              GENERATE REPORT
+              GENERATE REPORT (PDF)
+            </button>
+            <button
+              type="button"
+              onClick={generateCommonReport}
+              className="px-6 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              GENERATE COMMON REPORT (PDF)
             </button>
           </div>
         </form>

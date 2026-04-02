@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import FacultyService from '@/service/facultyService';
 
 const AwardForm = () => {
   const [formData, setFormData] = useState({
@@ -18,13 +20,27 @@ const AwardForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.document && formData.document.size > 1024 * 1024) {
-      alert('File size must be less than 1MB');
+      toast.error('File size must be less than 1MB');
       return;
     }
-    console.log('Form submitted:', formData);
+
+    try {
+      const dataToSend = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] !== null && formData[key] !== '') {
+          dataToSend.append(key, formData[key]);
+        }
+      });
+
+      await FacultyService.submitFacultyForm(FacultyService.FACULTY_FORM_TYPES.AWARDS, dataToSend);
+      toast.success('Data successfully saved!');
+      handleReset();
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to save data');
+    }
   };
 
   const handleReset = () => {
@@ -36,6 +52,38 @@ const AwardForm = () => {
       statusOfProject: '',
       document: null,
     });
+  };
+
+  const generateReport = async () => {
+    try {
+      const blob = await FacultyService.downloadIndividualReport(
+        FacultyService.FACULTY_FORM_TYPES.AWARDS
+      );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'CR-Individual-awards.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('PDF report downloaded');
+    } catch {
+      toast.error('Failed to generate PDF report');
+    }
+  };
+
+  const generateCommonReport = async () => {
+    try {
+      const blob = await FacultyService.downloadConsolidatedReport();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'CR-Common-All-Forms.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('Common PDF report downloaded');
+    } catch {
+      toast.error('Failed to generate common PDF report');
+    }
   };
 
   return (
@@ -136,6 +184,20 @@ const AwardForm = () => {
           className="px-4 py-2 bg-gray-500 text-white rounded"
         >
           Reset
+        </button>
+        <button
+          type="button"
+          onClick={generateReport}
+          className="px-4 py-2 bg-green-600 text-white rounded"
+        >
+          Generate Report (PDF)
+        </button>
+        <button
+          type="button"
+          onClick={generateCommonReport}
+          className="px-4 py-2 bg-indigo-600 text-white rounded"
+        >
+          Generate Common Report (PDF)
         </button>
       </div>
     </form>

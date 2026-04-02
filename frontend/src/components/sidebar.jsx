@@ -27,6 +27,8 @@ const Sidebar = () => {
 
   const [collapsed, setCollapsed] = useState(false);
   const [facultyOpen, setFacultyOpen] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const isFaculty = user?.role === "faculty";
 
   const isActive = (path) => location.pathname === path;
 

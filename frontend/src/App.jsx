@@ -14,12 +14,22 @@ function App() {
 
   useEffect(() => {
     const hasToken = localStorage.getItem("access_token");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const dashboardPath = user?.role === "faculty" ? "/dashboard/seed-money" : "/dashboard";
     const isAuthPage = ["/login", "/register"].includes(location.pathname);
+    const isDashboardPath = location.pathname.startsWith("/dashboard");
 
+    // Logged-in users: send only from auth pages/root to dashboard
     if (hasToken) {
-      navigate("/dashboard");
-    } else if (!isAuthPage) {
-      navigate("/login");
+      if (isAuthPage || location.pathname === "/") {
+        navigate(dashboardPath, { replace: true });
+      }
+      return;
+    }
+
+    // Logged-out users: block dashboard routes
+    if (!hasToken && isDashboardPath) {
+      navigate("/login", { replace: true });
     }
   }, [location.pathname, navigate]);
 

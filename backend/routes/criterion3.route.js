@@ -1,11 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const { addNAACData } = require("../controller/criterion3.controller"); // Path check karein
-const upload = require("../middleware/multer.middleware"); // Multer check karein
+const {
+  addNAACData,
+  submitFacultyForm,
+  getFacultyFormsData,
+  generateIndividualFormReport,
+  generateConsolidatedReport,
+} = require("../controller/criterion3.controller");
+const upload = require("../middleware/multer.middleware");
 const Criterion3 = require("../models/Criterion3.model");
+const { verifyToken } = require("../middleware/auth.middleware");
 
-// YE LINE SABSE IMPORTANT HAI:
-router.post("/add", upload.single('document'), addNAACData); 
+router.post("/add", verifyToken, upload.single("document"), addNAACData);
+router.post("/forms/:formType", verifyToken, upload.single("document"), submitFacultyForm);
+router.get("/forms", verifyToken, getFacultyFormsData);
+router.get("/reports/individual", verifyToken, generateIndividualFormReport);
+router.get("/reports/consolidated", verifyToken, generateConsolidatedReport);
 
 // GET endpoint to fetch all Criterion3 data
 router.get("/", async (req, res) => {

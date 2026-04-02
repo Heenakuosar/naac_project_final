@@ -63,7 +63,8 @@ const Login = () => {
         const { user, token } = response.data.data || {};
         toast.success("Login successful!");
         dispatch(login({ user, token }));
-        navigate("/dashboard");
+        const dashboardPath = user?.role === "faculty" ? "/dashboard/seed-money" : "/dashboard";
+        navigate(dashboardPath);
       }
     } catch (error) {
       console.error("Login failed", error);
@@ -77,10 +78,11 @@ const Login = () => {
 
   useEffect(() => {
     if (localStorage.getItem("access_token")) {
-      // navigate to dashboard
-      navigate("/dashboard");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const dashboardPath = user?.role === "faculty" ? "/dashboard/seed-money" : "/dashboard";
+      navigate(dashboardPath);
     }
-  }, []);
+  }, [navigate]);
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md">

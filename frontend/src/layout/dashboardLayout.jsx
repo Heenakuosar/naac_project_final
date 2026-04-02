@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Sidebar from "../components/sidebar";
 import Dashboard from "../views/dashboard/dashboard";
@@ -26,7 +26,10 @@ const DashboardLayout = () => {
       <div className="flex-1 p-4 bg-gray-100">
         <Routes>
           {/* Default dashboard */}
-          <Route path="/" element={<Dashboard />} />
+          <Route
+            path="/"
+            element={<Dashboard />}
+          />
 
           {/* Seed Money Form – new page */}
           <Route path="seed-money" element={<SeedMoneyForm />} />

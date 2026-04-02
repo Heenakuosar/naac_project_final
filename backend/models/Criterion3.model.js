@@ -1,11 +1,24 @@
 const mongoose = require('mongoose');
 
 const Criterion3Schema = new mongoose.Schema({
+    formType: {
+        type: String,
+        required: false,
+        enum: [
+            'seed-money',
+            'awards',
+            'innovations',
+            'patents-published',
+            'phds-awarded',
+            'research-papers',
+            'books'
+        ]
+    },
+
     // Yeh field batayega ki data kis category ka hai (Seed Money ya Research Paper)
     category: { 
         type: String, 
-        required: true, 
-        enum: ['seed-money', 'research-publication', 'fellowship', 'collaboration'] 
+        required: false
     },
     
     // Common Fields jo PPT mein hain
@@ -25,6 +38,14 @@ const Criterion3Schema = new mongoose.Schema({
     
     // Document Upload (Aapke report ke mutabiq)
     documentLink: { type: String }, 
+
+    activityData: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+
+    facultyName: { type: String },
+    facultyEmail: { type: String },
     
     submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Kisne entry ki
 }, { timestamps: true });

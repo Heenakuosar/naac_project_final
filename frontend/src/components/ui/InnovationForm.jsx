@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import jsPDF from 'jspdf';
+import toast from 'react-hot-toast';
+import FacultyService from '@/service/facultyService';
 import './InnovationForm.css';
 
 const InnovationForm = () => {
@@ -51,12 +51,11 @@ const InnovationForm = () => {
 
     setIsSubmitting(true);
     try {
-      await axios.post('http://127.0.0.1:8000/api/criteria3/innovation', dataToSend);
-      alert('✅ Data successfully saved!');
+      await FacultyService.submitFacultyForm(FacultyService.FACULTY_FORM_TYPES.INNOVATIONS, dataToSend);
+      toast.success('Data successfully saved!');
       handleReset();
     } catch (err) {
-      console.error('Error:', err);
-      alert(`❌ Error: ${err.response?.data?.error || err.message}`);
+      toast.error(err?.data?.message || 'Failed to save data');
     } finally {
       setIsSubmitting(false);
     }
@@ -77,33 +76,33 @@ const InnovationForm = () => {
 
   const generateReport = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/criteria3/innovation-report');
-      const allData = response.data;
+      const blob = await FacultyService.downloadIndividualReport(
+        FacultyService.FACULTY_FORM_TYPES.INNOVATIONS
+      );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'CR-Individual-innovations.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('PDF report downloaded');
+    } catch {
+      toast.error('Failed to generate PDF report');
+    }
+  };
 
-      const doc = new jsPDF();
-      doc.setFontSize(16);
-      doc.text('Innovation Report', 10, 10);
-
-      allData.forEach((data, index) => {
-        doc.setFontSize(12);
-        doc.text(
-          `Record ${index + 1}:
-Title of Innovation: ${data.titleOfInnovation}
-Innovation Name: ${data.innovationName}
-Award Name: ${data.awardName}
-Awarding Agency: ${data.awardingAgency}
-Year of Award: ${data.yearOfAward}
-Category: ${data.category}
-`,
-          10,
-          20 + index * 30
-        );
-      });
-
-      doc.save('InnovationReport.pdf');
-    } catch (error) {
-      console.error('Error generating report:', error);
-      alert('❌ Failed to generate report.');
+  const generateCommonReport = async () => {
+    try {
+      const blob = await FacultyService.downloadConsolidatedReport();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'CR-Common-All-Forms.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('Common PDF report downloaded');
+    } catch {
+      toast.error('Failed to generate common PDF report');
     }
   };
 
@@ -209,7 +208,10 @@ Category: ${data.category}
             Reset
           </button>
           <button type="button" className="btn-outlined" onClick={generateReport}>
-            Generate Report
+            Generate Report (PDF)
+          </button>
+          <button type="button" className="btn-outlined" onClick={generateCommonReport}>
+            Generate Common Report (PDF)
           </button>
         </div>
       </form>

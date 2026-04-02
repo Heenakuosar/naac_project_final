@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import toast from 'react-hot-toast';
+import FacultyService from '@/service/facultyService';
 
 const PatentsPublishedForm = () => {
   const [formData, setFormData] = useState({
@@ -28,12 +29,43 @@ const PatentsPublishedForm = () => {
     });
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/criteria3/patents', dataToSend);
-      alert('✅ Data Successfully saved!');
+      await FacultyService.submitFacultyForm(FacultyService.FACULTY_FORM_TYPES.PATENTS_PUBLISHED, dataToSend);
+      toast.success('Data Successfully saved!');
       handleReset();
     } catch (err) {
-      console.error('Error:', err);
-      alert(`❌ Error: ${err.response?.data?.error || err.message}`);
+      toast.error(err?.data?.message || 'Failed to save data');
+    }
+  };
+
+  const generateReport = async () => {
+    try {
+      const blob = await FacultyService.downloadIndividualReport(
+        FacultyService.FACULTY_FORM_TYPES.PATENTS_PUBLISHED
+      );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'CR-Individual-patents-published.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('PDF report downloaded');
+    } catch {
+      toast.error('Failed to generate PDF report');
+    }
+  };
+
+  const generateCommonReport = async () => {
+    try {
+      const blob = await FacultyService.downloadConsolidatedReport();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'CR-Common-All-Forms.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('Common PDF report downloaded');
+    } catch {
+      toast.error('Failed to generate common PDF report');
     }
   };
 
@@ -102,6 +134,8 @@ const PatentsPublishedForm = () => {
         </label>
         <button type="submit">Submit</button>
         <button type="button" onClick={handleReset}>Reset</button>
+        <button type="button" onClick={generateReport}>Generate Report (PDF)</button>
+        <button type="button" onClick={generateCommonReport}>Generate Common Report (PDF)</button>
       </form>
     </div>
   );

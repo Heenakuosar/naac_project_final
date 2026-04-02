@@ -22,7 +22,7 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user",
+    role: "faculty",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -213,8 +213,7 @@ const Register = () => {
                   className="w-full rounded-3xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-200"
                   disabled={isLoading}
                 >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
+                  <option value="faculty">Faculty</option>
                 </select>
               </div>
 

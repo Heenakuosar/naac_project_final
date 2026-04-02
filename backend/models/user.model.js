@@ -17,7 +17,7 @@ const userSchema=new mongoose.Schema({
     role:{
         type:String,
         required:false,
-        default:"user", // Possible values: 'user', 'admin'
+        default:"faculty", // Possible values: 'user', 'admin'
     },
 
 },{
